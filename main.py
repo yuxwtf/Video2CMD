@@ -1,11 +1,35 @@
-import os, shutil, time, cv2, threading, sys
+import os, shutil, time, cv2, threading, string
 import pywhatkit
 from pydub import AudioSegment 
-from pydub.playback import play 
+from pydub.playback import play
+from PIL import Image
 
 count = 7776
 inputfile = None
 
+def toascii(in_, out, mode):
+	img = Image.open(in_)
+	width, height = img.size
+	aspect_ratio = height/width
+	new_width = 120
+	new_height = aspect_ratio * new_width * 0.55
+	img = img.resize((new_width, int(new_height)))
+	img = img.convert('L')
+	pixels = img.getdata()
+	if mode == 1:
+		chars = string.punctuation
+	elif mode == 2:
+		chars = ["B","S","#","&","@","$","%","*","!",":","."]
+	else:
+		chars = ["B","S","#","&","@","$","%","*","!",":","."]
+	new_pixels = [chars[pixel//25] for pixel in pixels]
+	new_pixels = ''.join(new_pixels)
+	new_pixels_count = len(new_pixels)
+	ascii_image = [new_pixels[index:index + new_width] for index in range(0, new_pixels_count, new_width)]
+	ascii_image = "\n".join(ascii_image)
+	with open(f"{out}.txt", "w") as f:
+	  f.write(ascii_image)
+	  f.close()
 
 def splitframes(inputfile):
 	global count
@@ -22,9 +46,16 @@ def splitframes(inputfile):
 	os.system('cls')
 	print(f'Splitted {count-1} frames !')
 
-def convert_to_ascii(inputfile):
+def convert_to_ascii(inputfile, mode):
 	for i in range(count):
-		pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
+		if mode == 1:
+			pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
+		elif mode == 2:
+			toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=1)
+		elif mode == 3:
+			toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=2)
+		else:
+			pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
 		os.remove(f"./temp/{inputfile}/{i}.jpg")
 		print(f'[DEBUG] {i}.png CONVERTED TO ASCCI !')
 	os.system('cls')
@@ -43,8 +74,6 @@ def startanim(inputfile, speed):
 	s = AudioSegment.from_wav(f"./temp/{inputfile}/audio.wav")
 	st = threading.Thread(target=startsong, args=(s,))
 	st.start()
-	ut = threading.Thread(target=init_title, args=(inputfile,))
-	ut.start()
 	time.sleep(0.2)
 	for i in range(count):
 		f = open(f'./temp/{inputfile}/{i}.txt', 'r')
@@ -64,11 +93,13 @@ def startanim(inputfile, speed):
 
 
 f = input('video file : ')
-
+asciimode = int(input('ASCII mode ? (1/2/3) : '))
 try:
+	ut = threading.Thread(target=init_title, args=(f,))
+	ut.start()
 	try:
 		splitframes(f)
-		convert_to_ascii(f)
+		convert_to_ascii(f, mode=int(asciimode))
 		startanim(f, 0.0110)
 	except:
 		shutil.rmtree(f'./temp/{f}')
