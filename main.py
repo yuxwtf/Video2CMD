@@ -42,28 +42,25 @@ def splitframes(inputfile):
 	count = 0
 	print('spliting video...', end="\r")
 	while success:
-	  if os.path.exists(f'./temp/{inputfile}/{count}.jpg') == False:
-		  cv2.imwrite(f'./temp/{inputfile}/{count}.jpg', image)
-		  print(f'[DEBUG] {count}.jpg SPLITTED !')
-		  success,image = vidcap.read()
-	  elif os.path.exists(f'./temp/{inputfile}/{count}.jpg') == True:
-	  	count += 1
+	  cv2.imwrite(f'./temp/{inputfile}/{count}.jpg', image)
+	  print(f'[DEBUG] {count}.jpg SPLITTED !')
+	  success,image = vidcap.read()
+	  count += 1
 	os.system('cls')
 	print(f'Splitted {count-1} frames !')
 
 def convert_to_ascii(inputfile, mode):
 	for i in range(count):
-		if os.path.exists(f'./temp/{inputfile}/{count}.txt') == False:
-			if mode == 1:
-				pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
-			elif mode == 2:
-				toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=1)
-			elif mode == 3:
-				toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=2)
-			else:
-				pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
-			os.remove(f"./temp/{inputfile}/{i}.jpg")
-			print(f'[DEBUG] {i}.png CONVERTED TO ASCCI !')
+		if mode == 1:
+			pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
+		elif mode == 2:
+			toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=1)
+		elif mode == 3:
+			toascii(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}', mode=2)
+		else:
+			pywhatkit.image_to_ascii_art(f'./temp/{inputfile}/{i}.jpg', f'./temp/{inputfile}/{i}')
+		os.remove(f"./temp/{inputfile}/{i}.jpg")
+		print(f'[DEBUG] {i}.png CONVERTED TO ASCCI !')
 	os.system('cls')
 	print(f'Converted {count-1} images to ASCII !')
 
@@ -79,12 +76,14 @@ def startanim(inputfile, speed):
 	os.system('cls')
 	s = AudioSegment.from_wav(f"./temp/{inputfile}/audio.wav")
 	st = threading.Thread(target=startsong, args=(s,))
-	st.start(0.1)
+	st.start()
+	time.sleep(0.2)
 	for i in range(count):
 		f = open(f'./temp/{inputfile}/{i}.txt', 'r')
 		frame = f.read()
 		print(frame, end='\r', flush=True)
 		f.close()
+		os.remove(f"./temp/{inputfile}/{i}.txt")
 		time.sleep(speed)
 		os.system('title ')
 	shutil.rmtree(f'./temp/{inputfile}')
@@ -98,11 +97,17 @@ def startanim(inputfile, speed):
 
 f = input('video file : ')
 asciimode = int(input('ASCII mode ? (1/2/3) : '))
-ut = threading.Thread(target=init_title, args=(f,))
-ut.start()
 try:
-	splitframes(f)
-	convert_to_ascii(f, mode=int(asciimode))
-	startanim(f, 0.0110)
-except:
-	pass
+	ut = threading.Thread(target=init_title, args=(f,))
+	ut.start()
+	try:
+		splitframes(f)
+		convert_to_ascii(f, mode=int(asciimode))
+		startanim(f, 0.0110)
+	except:
+		os.rmdir(f'./temp/{f}')
+		splitframes(f)
+		convert_to_ascii(f, mode=int(asciimode))
+		startanim(f, 0.0110)
+except Exception as e:
+	print(e)
