@@ -9,7 +9,7 @@ transform video to ASCII in the cmd
 
 # Requirements
 
-type : "pip install requirements.txt" in the cmd
+type : "pip install -r requirements.txt" in the cmd
 
 # Start
 
