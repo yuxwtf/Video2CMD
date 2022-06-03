@@ -4,7 +4,7 @@ from pydub import AudioSegment
 from pydub.playback import play
 from PIL import Image
 
-count = 7776
+count = 0
 inputfile = None
 
 def toascii(in_, out, mode):
