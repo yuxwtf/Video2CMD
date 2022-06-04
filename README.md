@@ -16,3 +16,6 @@ type : "pip install -r requirements.txt" in the cmd
 do "python main.py" in the cmd!
 put the name of your MP4 file !
 
+# Control
+
+Press ENTER when u want to pause the ascii video
