@@ -6,7 +6,6 @@ from PIL import Image
 
 count = 0
 inputfile = None
-paused = False
 
 def toascii(in_, out, mode):
 	img = Image.open(in_)
@@ -73,40 +72,26 @@ def init_title(inputfile):
 		os.system(f'title VIDEO2CMD ^| Playing: {inputfile} ^| Frames: {count} ^| Speed: ~60FPS')
 
 def startanim(inputfile, speed):
-	global paused
-	paused = False
 	os.system(f'ffmpeg.exe -i {inputfile} -ab 160k -ac 2 -ar 44100 -vn ./temp/{inputfile}/audio.wav')
 	os.system('cls')
 	s = AudioSegment.from_wav(f"./temp/{inputfile}/audio.wav")
 	st = threading.Thread(target=startsong, args=(s,))
 	st.start()
-	time.sleep(0.6)
+	time.sleep(0.2)
 	for i in range(count):
 		f = open(f'./temp/{inputfile}/{i}.txt', 'r')
 		frame = f.read()
-		if paused == False:
-			print(frame, end='\r', flush=True)
+		print(frame, end='\r', flush=True)
 		f.close()
 		os.remove(f"./temp/{inputfile}/{i}.txt")
 		time.sleep(speed)
+		os.system('title ')
 	shutil.rmtree(f'./temp/{inputfile}')
 	time.sleep(2)
 	os.system('cls')
 	print("		Thanks for using VIDEO2CMD by Yux !")
 	input('')
 	exit()
-
-def pause():
-	global paused
-	paused = False
-	while True:
-		input(' ')
-		os.system('cls')
-		time.sleep(0.3)
-		if paused:
-			paused = False
-		else:
-			paused = True
 
 
 
@@ -118,17 +103,11 @@ try:
 	try:
 		splitframes(f)
 		convert_to_ascii(f, mode=int(asciimode))
-		c = threading.Thread(target=pause)
-		c.start()
-		time.sleep(1)
 		startanim(f, 0.0110)
 	except:
 		os.rmdir(f'./temp/{f}')
 		splitframes(f)
 		convert_to_ascii(f, mode=int(asciimode))
-		c = threading.Thread(target=pause)
-		c.start()
-		time.sleep(1)
 		startanim(f, 0.0110)
 except Exception as e:
 	print(e)
