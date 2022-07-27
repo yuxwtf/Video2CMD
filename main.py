@@ -1,4 +1,5 @@
 import os, shutil, time, cv2, threading, string
+import ascii2text
 import pywhatkit
 from pydub import AudioSegment 
 from pydub.playback import play
